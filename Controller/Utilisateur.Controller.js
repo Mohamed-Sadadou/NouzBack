@@ -1,0 +1,406 @@
+const UserModel = require("../Models/Utilisateur.Model");
+const Accident = require("../Models/Accident");
+//**************************************************/
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const maxAge = 24 * 60 * 60 * 100;
+const CODE = "Token_secret_Accident";
+function createdate() {
+	var date = Date.now();
+	var d = new Date(date),
+		month = "" + (d.getMonth() + 1),
+		day = "" + d.getDate(),
+		year = d.getFullYear();
+
+	if (month.length < 2) month = "0" + month;
+	if (day.length < 2) day = "0" + day;
+	return [year, month, day].join("");
+}
+const CodifieIdUser = () => {
+	return ["U", createdate(), Math.floor(Math.random() * 1000000)].join("");
+};
+const CodifieIdAccident = () => {
+	return Math.floor(Math.random() * 1000000);
+};
+//***************** creer un jeton adapté ************************************************************************************/
+const createToken = (id) => {
+	return jwt.sign({ userId: id }, CODE, { expiresIn: maxAge });
+};
+module.exports.CreeCompte = async (req, res) => {
+	console.log("on affiche le req  ", req.body);
+	const id_user = CodifieIdUser();
+	const { mdp, nom, prenom, type } = req.body;
+	console.log("id_user : ", id_user, " nomUtilisateur : ", nom, " mdp : ", mdp);
+
+	bcrypt
+		.hash(mdp, 10)
+		.then((hash) => {
+			console.log("le mdp: ", hash);
+			const user = new UserModel({
+				id_user,
+				mdp: hash,
+				nom,
+				prenom,
+				type,
+			});
+			user
+				.save()
+				.then(async () => {
+					console.log("utilisateur creer on le connect !! ", id_user);
+					await UserModel.findOne({ id_user: id_user })
+						.then((user) => {
+							console.log("utilisateur : !!", user);
+							if (!user) {
+								return res
+									.status(201)
+									.json({ error: "Utilisateur non trouvé !" });
+							}
+							bcrypt
+								.compare(req.body.mdp, user.mdp)
+								.then((valid) => {
+									if (!valid) {
+										return res
+											.status(202)
+											.json({ error: "Mot de passe incorrect !" });
+									}
+									const token = createToken(user._id);
+									console.log("CONNECTER");
+									res.cookie("jwt", token, { httpOnly: true, maxAge });
+									res.cookie("id_user", id_user.replace(/ /g, ""), {
+										httpOnly: true,
+										maxAge,
+									});
+									res.cookie("nom", user.nom, {
+										httpOnly: true,
+										maxAge,
+									});
+									res.cookie("prenom", user.prenom, { httpOnly: true, maxAge });
+									res.cookie("type", user.type, {
+										httpOnly: true,
+										maxAge,
+									});
+									console.log("les cookies sont fait");
+									res.status(200).json({
+										user: user._id,
+										id_user: req.body.id_user,
+									});
+								})
+								.catch((error) => res.status(500).json({ error }));
+						})
+						.catch((error) => res.status(500).json({ error }));
+				})
+				.catch((error) => res.status(400).json({ error }));
+		})
+		.catch((error) => res.status(500).json({ error }));
+};
+module.exports.SeConnecter = async function SeConnecter(req, res) {
+	await UserModel.findOne({ id_user: req.body.id_user })
+		.then((user) => {
+			if (!user) {
+				return res.status(201).json({ error: "Utilisateur non trouvé !" });
+			}
+			bcrypt
+				.compare(req.body.mdp, user.mdp)
+				.then((valid) => {
+					if (!valid) {
+						return res.status(202).json({ error: "Mot de passe incorrect !" });
+					}
+					const token = createToken(user._id);
+					console.log("CONNECTER");
+					console.log(
+						"nos cookies : ",
+						token,
+						"--",
+						req.body.id_user,
+						"---",
+					);
+					res.cookie("jwt", token, { httpOnly: true, maxAge });
+					res.cookie("id_user", req.body.id_user.replace(/ /g, ""), {
+						httpOnly: true,
+						maxAge,
+					});
+					res.cookie("nom", user.nom, { httpOnly: true, maxAge });
+					res.cookie("prenom", user.prenom, { httpOnly: true, maxAge });
+					res.cookie("type", user.type, { httpOnly: true, maxAge });
+					res.status(200).json({
+						user: user._id,
+						id_user: req.body.id_user,
+					});
+				})
+				.catch((error) => res.status(500).json({ error }));
+		})
+		.catch((error) => res.status(500).json({ error }));
+};
+module.exports.Deconnection = (req, res) => {
+	console.log("ON va se deconnecter");
+	res.cookie("jwt", "", { maxAge: 1 });
+	res.cookie("id_user", "", { maxAge: 1 });
+	res.cookie("nom", "", { maxAge: 1 });
+	res.cookie("prenom", "", { maxAge: 1 });
+	res.cookie("type", "", { maxAge: 1 });
+	res.status(200).json("/Deconnected");
+};
+module.exports.RecupDonneesUser = (req, res, next) => {
+	const token = req.cookies.jwt;
+	console.log("On recupe les données !!!");
+	console.log("on chek ce token :", token);
+	if (token) {
+		jwt.verify(token, CODE, async (err, decodedToken) => {
+			if (err) {
+				res.locals.user = null;
+				res.cookies("jwt", "", { maxAge: 1 });
+				console.log("on va retourné 201");
+				next();
+				res.status(201).json();
+			} else {
+				console.log(
+					"on va send la request et les context !!! " +
+						"id:" +
+						decodedToken.userId
+				);
+				res.status(200).json({
+					id: decodedToken.userId,
+					id_user: req.cookies.id_user,
+					nom: req.cookies.nom,
+					prenom: req.cookies.prenom,
+					type: req.cookies.type,
+				});
+			}
+		});
+	} else {
+		console.log("mauvais token");
+		res.status(201).json({ error: "Utilisateur Non connecté !" });
+	}
+};
+module.exports.getAllUsers = async (req, res) => {
+	const users = await UserModel.find().select("-mdp");
+	res.status(200).json(users);
+};
+module.exports.getUser = (req, res) => {
+	const token = req.cookies.jwt;
+	console.log("on chek ce token :", token);
+	if (token) {
+		jwt.verify(token, CODE, async (err, decodedToken) => {
+			if (err) {
+				res.locals.user = null;
+				res.cookies("jwt", "", { maxAge: 1 });
+				next();
+			} else {
+				console.log("on chek ce token :", decodedToken.userId);
+				UserModel.findById(decodedToken.userId, (err, docs) => {
+					if (!err) res.status(200).json(docs);
+					else console.log(" on a un souci : " + err);
+				}).select("-mdp");
+			}
+		});
+	} else {
+		console.log("mauvais token");
+		res.locals.user = null;
+		return res.status(404).json({ error: "ta pas le droit frere" });
+	}
+};
+module.exports.getUser2 = (req, res) => {
+	UserModel.find({ id_user: req.body.id_user }, (err, docs) => {
+		if (!err) res.status(200).json(docs);
+		else console.log(" on a un souci : " + err);
+	}).select("-mdp");
+};
+module.exports.Modifi = async (req, res) => {
+	const queryObj = {};
+	queryObj[req.body.what] = req.body.val;
+	console.log("on est la avec : ", queryObj);
+	try {
+		await UserModel.findOneAndUpdate(
+			{ id_user: req.body.id_user },
+			{ $set: queryObj },
+			{ new: true, upsert: true, setDefaultsOnInsert: true }
+		)
+			.then(() => {
+				console.log("---- ok ----");
+				return res.status(200).json({ message: "olk" });
+			})
+			.catch((err) => {
+				console.log("yeeeeeeeeew");
+			});
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+};
+module.exports.Modifinom = async (req, res) => {
+	try {
+		await UserModel.findOneAndUpdate(
+			{ id_user: req.body.id_user },
+			{ $set: { nom: req.body.nom } },
+			{ new: true, upsert: true, setDefaultsOnInsert: true },
+			(err, docs) => {
+				if (!err) {
+					console.log("---- ok ----");
+					return res.status(200).json(docs);
+				} else {
+					return res.status(500).send({ message: err });
+				}
+			}
+		);
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+};
+module.exports.ModifiUserpassword = async (req, res) => {
+	console.log(req.body.id_user);
+
+	console.log("on fait le try de modifie password");
+	const salt = await bcrypt.genSalt();
+	req.body.mdp = await bcrypt.hash(req.body.mdp, salt);
+
+	try {
+		await UserModel.findOneAndUpdate(
+			{ id_user: req.body.id_user },
+			{ $set: { mdp: req.body.mdp } },
+			{ new: true, upsert: true, setDefaultsOnInsert: true },
+			(err, docs) => {
+				if (!err) {
+					console.log("ok");
+					return res.status(200).json(docs);
+				} else return res.status(500).send({ message: err });
+			}
+		);
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+};
+module.exports.ModifiUserprenom = async (req, res) => {
+	try {
+		await UserModel.findOneAndUpdate(
+			{ id_user: req.body.id_user },
+			{ $set: { prenom: req.body.prenom } },
+			{ new: true, upsert: true, setDefaultsOnInsert: true },
+			(err, docs) => {
+				if (!err) {
+					console.log("---- ok ----");
+					return res.status(200).json(docs);
+				} else {
+					return res.status(500).send({ message: err });
+				}
+			}
+		);
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+};
+module.exports.ModifiUsertype = async (req, res) => {
+	try {
+		await UserModel.findOneAndUpdate(
+			{ id_user: req.body.id_user },
+			{ $set: { type: req.body.type } },
+			{ new: true, upsert: true, setDefaultsOnInsert: true },
+			(err, docs) => {
+				if (!err) {
+					console.log("---- ok ----");
+					return res.status(200).json(docs);
+				} else {
+					return res.status(500).send({ message: err });
+				}
+			}
+		);
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+};
+module.exports.SupprimeUser = async (req, res) => {
+	try {
+		await UserModel.remove({ id_user: req.body.id_user }).exec();
+		res.status(200).json({ message: "Suppression effectuer avec succes. " });
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+};
+module.exports.AjoutAccident = async (req, res) => {
+	console.log("on affiche le req  ", req.body);
+	const id_Accident = CodifieIdAccident();
+	const {
+		date,
+		heure,
+		type,
+		cause,
+		description,
+		etatRoute,
+		climat,
+		conducteurs,
+		passagers,
+		pietons,
+	} = req.body;
+	const acc = new Accident({
+		id_Accident,
+		date,
+		heure,
+		type,
+		cause,
+		description,
+		etatRoute,
+		climat,
+		conducteurs,
+		passagers,
+		pietons,
+	});
+	acc
+		.save()
+		.then(() => res.status(201).json({ message: "Accident créé !" }))
+		.catch((error) => res.status(400).json({ error }));
+};
+module.exports.ModifiAccident = async (req, res) => {
+	const queryObj = {};
+	queryObj[req.body.what] = req.body.val;
+	console.log("on est la avec : ", queryObj);
+	try {
+		await Accident.findOneAndUpdate(
+			{ id_Accident: req.body.id_Accident },
+			{ $set: queryObj },
+			{ new: true, upsert: true, setDefaultsOnInsert: true }
+		)
+			.then(() => {
+				console.log("---- ok ----");
+				return res.status(200).json({ message: "olk" });
+			})
+			.catch((err) => {
+				console.log("yeeeeeeeeew");
+			});
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+
+};
+module.exports.Accident = async (req, res) => {
+	Accident.find({ id_Accident: req.body.id_Accident }, (err, docs) => {
+		if (!err) res.status(200).json(docs);
+		else console.log(" on a un souci : " + err);
+	});
+};
+module.exports.Accidents = async (req, res) => {
+	const acc = await Accident.find();
+	res.status(200).json(acc);
+
+};
+module.exports.AccidentF = async (req, res) => {
+	const queryObj = {};
+	queryObj["id_Accident"] =req.body.id_Accident;
+	queryObj[req.body.what] = req.body.val;
+	Accident.find(queryObj, (err, docs) => {
+		if (!err) res.status(200).json(docs);
+		else console.log(" on a un souci : " + err);
+	});
+};
+module.exports.AccidentF2 = async (req, res) => {
+	const queryObj = req.body.queryObj;
+	Accident.find(queryObj, (err, docs) => {
+		if (!err) res.status(200).json(docs);
+		else console.log(" on a un souci : " + err);
+	});
+};
+module.exports.SuppAccident = async (req, res) => {
+	try {
+		await Accident.remove({ id_Accident: req.body.id_Accident }).exec();
+		res.status(200).json({ message: "Suppression effectuer avec succes. " });
+	} catch (err) {
+		return res.status(500).json({ message: err });
+	}
+};
