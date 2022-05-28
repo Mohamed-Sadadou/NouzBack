@@ -382,7 +382,6 @@ module.exports.Accidents = async (req, res) => {
 };
 module.exports.AccidentF = async (req, res) => {
 	const queryObj = {};
-	queryObj["id_Accident"] =req.body.id_Accident;
 	queryObj[req.body.what] = req.body.val;
 	Accident.find(queryObj, (err, docs) => {
 		if (!err) res.status(200).json(docs);
@@ -404,3 +403,4 @@ module.exports.SuppAccident = async (req, res) => {
 		return res.status(500).json({ message: err });
 	}
 };
+ 
