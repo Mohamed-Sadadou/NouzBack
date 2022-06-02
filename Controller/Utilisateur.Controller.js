@@ -107,13 +107,7 @@ module.exports.SeConnecter = async function SeConnecter(req, res) {
 					}
 					const token = createToken(user._id);
 					console.log("CONNECTER");
-					console.log(
-						"nos cookies : ",
-						token,
-						"--",
-						req.body.id_user,
-						"---",
-					);
+					console.log("nos cookies : ", token, "--", req.body.id_user, "---");
 					res.cookie("jwt", token, { httpOnly: true, maxAge });
 					res.cookie("id_user", req.body.id_user.replace(/ /g, ""), {
 						httpOnly: true,
@@ -125,6 +119,9 @@ module.exports.SeConnecter = async function SeConnecter(req, res) {
 					res.status(200).json({
 						user: user._id,
 						id_user: req.body.id_user,
+						nom: user.nom,
+						prenom: user.prenom,
+						type: user.type,
 					});
 				})
 				.catch((error) => res.status(500).json({ error }));
@@ -367,7 +364,6 @@ module.exports.ModifiAccident = async (req, res) => {
 	} catch (err) {
 		return res.status(500).json({ message: err });
 	}
-
 };
 module.exports.Accident = async (req, res) => {
 	Accident.find({ id_Accident: req.body.id_Accident }, (err, docs) => {
@@ -378,7 +374,6 @@ module.exports.Accident = async (req, res) => {
 module.exports.Accidents = async (req, res) => {
 	const acc = await Accident.find();
 	res.status(200).json(acc);
-
 };
 module.exports.AccidentF = async (req, res) => {
 	const queryObj = {};
@@ -392,7 +387,7 @@ module.exports.AccidentF2 = async (req, res) => {
 	const queryObj = req.body.queryObj;
 	Accident.find(queryObj, (err, docs) => {
 		if (!err) res.status(200).json(docs);
-		else console.log(" on a un souci : " + err);
+		else console.log("  on a un souci : " + err);
 	});
 };
 module.exports.SuppAccident = async (req, res) => {
@@ -403,4 +398,3 @@ module.exports.SuppAccident = async (req, res) => {
 		return res.status(500).json({ message: err });
 	}
 };
- 
