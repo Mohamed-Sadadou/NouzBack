@@ -403,7 +403,7 @@ module.exports.statType = async (req, res) => {
 	const resp = {};
 	req.body.types.forEach((element) => {
 		console.log("iteration");
-		const queryObj={};
+		const queryObj = {};
 		queryObj["type"] = element;
 		Accident.find(queryObj, (err, docs) => {
 			if (!err) {
@@ -416,9 +416,9 @@ module.exports.statType = async (req, res) => {
 };
 module.exports.statCause = async (req, res) => {
 	const resp = {};
-	await req.body.causes.forEach(async(element) => {
+	req.body.causes.forEach(async (element) => {
 		console.log("iteration");
-		const queryObj={};
+		const queryObj = {};
 		queryObj["cause"] = element;
 		await Accident.find(queryObj, (err, docs) => {
 			if (!err) {
@@ -427,7 +427,8 @@ module.exports.statCause = async (req, res) => {
 			} else console.log("  on a un souci : " + err);
 		});
 	});
-	console.log("la response : ",resp);
+	console.log("la response : ", resp);
+
 	res.status(200).json(resp);
 };
 module.exports.statdate = async (req, res) => {
@@ -441,7 +442,7 @@ module.exports.statdate = async (req, res) => {
 		novembre: 0,
 	};
 	await acc.forEach((a) => {
-		console.log("iteration")
+		console.log("iteration");
 		if (a.date.substring(5, 7) === "01") {
 			resp.janvier++;
 		}
