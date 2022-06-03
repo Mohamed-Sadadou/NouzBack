@@ -401,38 +401,93 @@ module.exports.SuppAccident = async (req, res) => {
 
 module.exports.statType = async (req, res) => {
 	const resp = {};
-	req.body.types.forEach((element) => {
-		console.log("iteration");
-		const queryObj = {};
-		queryObj["type"] = element;
-		Accident.find(queryObj, (err, docs) => {
-			if (!err) {
-				resp[element] = docs.length;
-				console.log(resp);
-			} else console.log("  on a un souci : " + err);
-		});
+	const queryObj = {};
+	queryObj["type"] = req.body.types[0];
+	await Accident.find(queryObj, (err, docs) => {
+		if (!err) {
+			resp[req.body.types[0]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
 	});
+	const queryObj1 = {};
+	queryObj1["type"] = req.body.types[1];
+	await Accident.find(queryObj1, (err, docs) => {
+		if (!err) {
+			resp[req.body.types[1]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	const queryObj2 = {};
+	queryObj2["type"] = req.body.types[2];
+	await Accident.find(queryObj2, (err, docs) => {
+		if (!err) {
+			resp[req.body.types[2]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	const queryObj3 = {};
+	queryObj3["type"] = req.body.types[3];
+	await Accident.find(queryObj3, (err, docs) => {
+		if (!err) {
+			resp[req.body.types[3]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	const queryObj4 = {};
+	queryObj4["type"] = req.body.types[4];
+	await Accident.find(queryObj4, (err, docs) => {
+		if (!err) {
+			resp[req.body.types[4]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	console.log("la response : ",resp);
 	res.status(200).json(resp);
 };
 module.exports.statCause = async (req, res) => {
 	const resp = {};
-	req.body.causes
-		.forEach(async (element) => {
-			console.log("iteration");
-			const queryObj = {};
-			queryObj["cause"] = element;
-			await Accident.find(queryObj, (err, docs) => {
-				if (!err) {
-					resp[element] = docs.length;
-					console.log(resp);
-				} else console.log("  on a un souci : " + err);
-			});
-		})
-		.then((e) => {
-			console.log("la response : ", resp);
-
-			res.status(200).json(resp);
-		});
+	const queryObj = {};
+	queryObj["cause"] = req.body.causes[0];
+	await Accident.find(queryObj, (err, docs) => {
+		if (!err) {
+			resp[req.body.causes[0]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	const queryObj1 = {};
+	queryObj1["cause"] = req.body.causes[1];
+	await Accident.find(queryObj1, (err, docs) => {
+		if (!err) {
+			resp[req.body.causes[1]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	const queryObj2 = {};
+	queryObj2["cause"] = req.body.causes[2];
+	await Accident.find(queryObj2, (err, docs) => {
+		if (!err) {
+			resp[req.body.causes[2]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	const queryObj3 = {};
+	queryObj3["cause"] = req.body.causes[3];
+	await Accident.find(queryObj3, (err, docs) => {
+		if (!err) {
+			resp[req.body.causes[3]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	const queryObj4 = {};
+	queryObj4["cause"] = req.body.causes[4];
+	await Accident.find(queryObj4, (err, docs) => {
+		if (!err) {
+			resp[req.body.causes[4]] = docs.length;
+			console.log(resp);
+		} else console.log("  on a un souci : " + err);
+	});
+	console.log("la response : ",resp);
+	res.status(200).json(resp);
 };
 module.exports.statdate = async (req, res) => {
 	const acc = await Accident.find();
