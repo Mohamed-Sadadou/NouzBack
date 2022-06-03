@@ -416,7 +416,7 @@ module.exports.statType = async (req, res) => {
 };
 module.exports.statCause = async (req, res) => {
 	const resp = {};
-	req.body.causes.forEach((element) => {
+	await req.body.causes.forEach((element) => {
 		console.log("iteration");
 		const queryObj={};
 		queryObj["cause"] = element;
@@ -427,6 +427,7 @@ module.exports.statCause = async (req, res) => {
 			} else console.log("  on a un souci : " + err);
 		});
 	});
+	console.log(resp);
 	res.status(200).json(resp);
 };
 module.exports.statdate = async (req, res) => {
