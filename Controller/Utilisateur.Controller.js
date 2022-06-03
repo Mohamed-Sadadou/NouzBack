@@ -398,3 +398,68 @@ module.exports.SuppAccident = async (req, res) => {
 		return res.status(500).json({ message: err });
 	}
 };
+
+module.exports.statType = async (req, res) => {
+	const resp = {};
+	req.body.types.forEach((element) => {
+		console.log("iteration");
+		const queryObj={};
+		queryObj["type"] = element;
+		Accident.find(queryObj, (err, docs) => {
+			if (!err) {
+				resp[element] = docs.length;
+				console.log(resp);
+			} else console.log("  on a un souci : " + err);
+		});
+	});
+	res.status(200).json(resp);
+};
+module.exports.statCause = async (req, res) => {
+	const resp = {};
+	req.body.causes.forEach((element) => {
+		console.log("iteration");
+		const queryObj={};
+		queryObj["cause"] = element;
+		Accident.find(queryObj, (err, docs) => {
+			if (!err) {
+				resp[element] = docs.length;
+				console.log(resp);
+			} else console.log("  on a un souci : " + err);
+		});
+	});
+	res.status(200).json(resp);
+};
+module.exports.statdate = async (req, res) => {
+	const acc = await Accident.find();
+	var resp = {
+		janvier: 0,
+		mars: 0,
+		mai: 0,
+		juillet: 0,
+		septembre: 0,
+		novembre: 0,
+	};
+	await acc.forEach((a) => {
+		console.log("iteration")
+		if (a.date.substring(5, 7) === "01") {
+			resp.janvier++;
+		}
+		if (a.date.substring(5, 7) === "03") {
+			resp.mars++;
+		}
+		if (a.date.substring(5, 7) === "05") {
+			resp.mai++;
+		}
+		if (a.date.substring(5, 7) === "07") {
+			resp.juillet++;
+		}
+		if (a.date.substring(5, 7) === "09") {
+			resp.septembre++;
+		}
+		if (a.date.substring(5, 7) === "11") {
+			resp.novembre++;
+		}
+	});
+	console.log(resp);
+	res.status(200).json(resp);
+};
