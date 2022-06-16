@@ -1,48 +1,74 @@
 const mongoose = require("mongoose");
 const Accident = new mongoose.Schema({
-	id_Accident: {
-		type: Number,
+	id: {
+		type: String,
 		required: true,
 		unique: true,
-		trim: true,
 	},
-	date: {
+	wilaya: {
 		type: String,
 		required: true,
 	},
-	heure: {
+	voie: {
 		type: String,
 		required: true,
 	},
-	type: {
+	catr: {
 		type: String,
 		required: true,
 	},
-	cause: {
+	surf: {
 		type: String,
 		required: true,
 	},
-	description: {
+	atm: {
 		type: String,
 		required: true,
 	},
-	etatRoute: {
+	intersec: {
 		type: String,
 		required: true,
 	},
-	climat: {
+	date_acc: {
 		type: String,
 		required: true,
+	},
+	heure_acc: {
+		type: String,
+		required: true,
+	},
+	lat: {
+		type: Number,
+		required: true,
+	},
+	long: {
+		type: Number,
+		required: true,
+	},
+	pietons: {
+		type: [
+			{
+				type: {
+					nom: String,
+					prenom: String,
+					date_naiss: String,
+					sexe: String,
+					trajet: String,
+					grav: String,
+				},
+			},
+		],
 	},
 	conducteurs: {
 		type: [
 			{
 				type: {
-					immatricule: String,
 					nom: String,
-					Prenom: String,
-					genre: String,
-					numTel: String,
+					prenom: String,
+					date_naiss: String,
+					sexe: String,
+					trajet: String,
+					grav: String,
 				},
 			},
 		],
@@ -52,21 +78,23 @@ const Accident = new mongoose.Schema({
 			{
 				type: {
 					nom: String,
-					Prenom: String,
-					genre: String,
-					numTel: String,
+					prenom: String,
+					date_naiss: String,
+					sexe: String,
+					trajet: String,
+					grav: String,
 				},
 			},
 		],
 	},
-	pietons: {
+	vehicule: {
 		type: [
 			{
 				type: {
-					nom: String,
-					Prenom: String,
-					genre: String,
-					numTel: String,
+					catv: String,
+					immatriculation: String,
+					choc: String,
+					motor: String,
 				},
 			},
 		],

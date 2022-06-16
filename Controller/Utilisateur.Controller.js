@@ -313,31 +313,40 @@ module.exports.SupprimeUser = async (req, res) => {
 };
 module.exports.AjoutAccident = async (req, res) => {
 	console.log("on affiche le req  ", req.body);
-	const id_Accident = CodifieIdAccident();
+
 	const {
-		date,
-		heure,
-		type,
-		cause,
-		description,
-		etatRoute,
-		climat,
+		id,
+		wilaya,
+		voie,
+		catr,
+		surf,
+		atm,
+		intersec,
+		date_acc,
+		heure_acc,
+		lat,
+		long,
+		pietons,
 		conducteurs,
 		passagers,
-		pietons,
+		vehicule,
 	} = req.body;
 	const acc = new Accident({
-		id_Accident,
-		date,
-		heure,
-		type,
-		cause,
-		description,
-		etatRoute,
-		climat,
+		id,
+		wilaya,
+		voie,
+		catr,
+		surf,
+		atm,
+		intersec,
+		date_acc,
+		heure_acc,
+		lat,
+		long,
+		pietons,
 		conducteurs,
 		passagers,
-		pietons,
+		vehicule,
 	});
 	acc
 		.save()
@@ -350,7 +359,7 @@ module.exports.ModifiAccident = async (req, res) => {
 	console.log("on est la avec : ", queryObj);
 	try {
 		await Accident.findOneAndUpdate(
-			{ id_Accident: req.body.id_Accident },
+			{ id: req.body.id },
 			{ $set: queryObj },
 			{ new: true, upsert: true, setDefaultsOnInsert: true }
 		)
@@ -366,7 +375,7 @@ module.exports.ModifiAccident = async (req, res) => {
 	}
 };
 module.exports.Accident = async (req, res) => {
-	Accident.find({ id_Accident: req.body.id_Accident }, (err, docs) => {
+	Accident.find({ id: req.body.id }, (err, docs) => {
 		if (!err) res.status(200).json(docs);
 		else console.log(" on a un souci : " + err);
 	});
@@ -392,13 +401,13 @@ module.exports.AccidentF2 = async (req, res) => {
 };
 module.exports.SuppAccident = async (req, res) => {
 	try {
-		await Accident.remove({ id_Accident: req.body.id_Accident }).exec();
+		await Accident.remove({ id: req.body.id }).exec();
 		res.status(200).json({ message: "Suppression effectuer avec succes. " });
 	} catch (err) {
 		return res.status(500).json({ message: err });
 	}
 };
-
+/*
 module.exports.statType = async (req, res) => {
 	var resp = {
 		type1: 0,
@@ -547,3 +556,4 @@ module.exports.statdate = async (req, res) => {
 	console.log(resp);
 	res.status(200).json(resp);
 };
+*/
