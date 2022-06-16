@@ -57,9 +57,9 @@ router.post("/AccidentF", Util.AccidentF);
 router.post("/AccidentF2", Util.AccidentF2);
 // supprimer un accident filtrer
 router.post("/SuppAccident", Util.SuppAccident);
+router.get("/statdate",Util.statdate);
 /*
 router.post("/statType",Util.statType);
 router.post("/statCause",Util.statCause);
-router.get("/statdate",Util.statdate);
 */
 module.exports = router;

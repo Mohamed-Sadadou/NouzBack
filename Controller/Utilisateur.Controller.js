@@ -407,7 +407,7 @@ module.exports.SuppAccident = async (req, res) => {
 		return res.status(500).json({ message: err });
 	}
 };
-/*
+
 module.exports.statType = async (req, res) => {
 	var resp = {
 		type1: 0,
@@ -534,26 +534,25 @@ module.exports.statdate = async (req, res) => {
 	};
 	await acc.forEach((a) => {
 		console.log("iteration");
-		if (a.date.substring(5, 7) === "01") {
+		if (a.date_acc.substring(5, 7) === "01") {
 			resp.janvier++;
 		}
-		if (a.date.substring(5, 7) === "03") {
+		if (a.date_acc.substring(5, 7) === "03") {
 			resp.mars++;
 		}
-		if (a.date.substring(5, 7) === "05") {
+		if (a.date_acc.substring(5, 7) === "05") {
 			resp.mai++;
 		}
-		if (a.date.substring(5, 7) === "07") {
+		if (a.date_acc.substring(5, 7) === "07") {
 			resp.juillet++;
 		}
-		if (a.date.substring(5, 7) === "09") {
+		if (a.date_acc.substring(5, 7) === "09") {
 			resp.septembre++;
 		}
-		if (a.date.substring(5, 7) === "11") {
+		if (a.date_acc.substring(5, 7) === "11") {
 			resp.novembre++;
 		}
 	});
 	console.log(resp);
 	res.status(200).json(resp);
 };
-*/
