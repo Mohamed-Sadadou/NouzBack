@@ -313,9 +313,9 @@ module.exports.SupprimeUser = async (req, res) => {
 };
 module.exports.AjoutAccident = async (req, res) => {
 	console.log("on affiche le req  ", req.body);
-
+	const id=CodifieIdAccident();
 	const {
-		id,
+		
 		wilaya,
 		voie,
 		catr,
@@ -407,7 +407,7 @@ module.exports.SuppAccident = async (req, res) => {
 		return res.status(500).json({ message: err });
 	}
 };
-
+/*
 module.exports.statType = async (req, res) => {
 	var resp = {
 		type1: 0,
@@ -464,7 +464,8 @@ module.exports.statType = async (req, res) => {
 			});
 		} else console.log("  on a un souci : " + err);
 	});
-};
+};*/
+/*
 module.exports.statCause = async (req, res) => {
 	var resp = {
 		cause1: 0,
@@ -521,7 +522,7 @@ module.exports.statCause = async (req, res) => {
 			});
 		} else console.log("  on a un souci : " + err);
 	});
-};
+};*/
 module.exports.statdate = async (req, res) => {
 	const acc = await Accident.find();
 	var resp = {
